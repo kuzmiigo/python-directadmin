@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-Directadmin API
+"""Directadmin API
 
 Python implementation of Directadmin Web API
 
@@ -24,39 +23,24 @@ import urlparse
 import base64
 
 class ApiError (Exception):
-
-    """
-    API Error
+    """API Error
 
     Generic exception for API error handling
     """
-
     pass
 
 class Api (object):
+    """API
 
+    Directadmin API implementation
     """
-
-    Directadmin API
-
-    Python implementation of Directadmin Web API
-
-    For more information, visit:
-    http://www.directadmin.com/api.html
-
-    Author: Andrés Gattinoni <andresgattinoni@gmail.com>
-
-    """
-    
     _hostname = None
     _port = 0
     _username = None
     _password = None
 
     def __init__ (self, username, password, hostname, port=2222):
-
-        """
-        Constructor
+        """Constructor
 
         Parameters:
         username = username to login on Directadmin
@@ -64,16 +48,13 @@ class Api (object):
         hostname = Directadmin's hostname
         port = port on which Directadmin listens (default: 2222)
         """
-
         self._hostname = hostname
         self._port = int(port)
         self._username = username
         self._password = password
 
     def _executeCmd (self, cmd, parameters=None):
-
-       """
-       Execute command
+       """Execute command
 
        Executes a command of the API
        processes the result and returns it
@@ -90,26 +71,29 @@ class Api (object):
        return self._handleResponse(urllib2.urlopen(request))
 
     def _getURL (self, cmd):
-        
-        """
-        Get URL
+        """Get URL
 
         Returns the URL for a specific command
         """
-
         return 'http://%s:%d/%s' % \
                (self._hostname, \
                 self._port, \
                 cmd)
 
     def _handleResponse (self, response):
-
-        """
-        Handle response
+        """Handle response
 
         Takes the response string returned by
         Directadmin server, checks for errors
         and returns a python-friendly object
+
+        Parameters:
+        response -- response object 
+
+        Returns a list or dictionary according 
+        to the method
+
+        Raises ApiError on errors
         """
         info = response.info()
         if info.getheader('X-DirectAdmin') == 'unauthorized':
@@ -126,9 +110,7 @@ class Api (object):
         return response 
 
     def listAllUsers (self):
-
-        """
-        List All Users
+        """List All Users
 
         Implements command CMD_API_SHOW_ALL_USERS
 
@@ -136,13 +118,10 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#showallusers
         """
-
         return self._executeCmd("CMD_API_SHOW_ALL_USERS")
 
     def listUsers (self, reseller=None):
-
-        """
-        List Users
+        """List Users
 
         Implements command CMD_API_SHOW_USERS
 
@@ -151,7 +130,6 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#showusers
         """
-
         parameters = None
         if reseller:
             parameters = [('reseller', reseller)]
@@ -159,9 +137,7 @@ class Api (object):
         return self._executeCmd("CMD_API_SHOW_USERS", parameters)
 
     def listResellers (self):
-
-        """
-        List Resellers
+        """List Resellers
 
         Implements command CMD_API_SHOW_RESELLERS
 
@@ -169,13 +145,10 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#showresellers
         """
-
         return self._executeCmd("CMD_API_SHOW_RESELLERS")
 
     def listAdmins (self):
-
-        """
-        List Admins
+        """List Admins
 
         Implements command CMD_API_SHOW_ADMINS
 
@@ -183,14 +156,11 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#showradmins
         """
-
         return self._executeCmd("CMD_API_SHOW_ADMINS")
 
 
     def getServerStats (self):
-        
-        """
-        Get Server Statistics
+        """Get Server Statistics
 
         Implements command CMD_API_ADMIN_STATS
 
@@ -198,13 +168,10 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#info
         """
-
         return self._executeCmd("CMD_API_ADMIN_STATS")
 
     def getUserUsage (self, user):
-        
-        """
-        Get User Usage
+        """Get User Usage
 
         Implements command CMD_API_SHOW_USER_USAGE
 
@@ -212,13 +179,10 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#info
         """
-
         return self._executeCmd("CMD_API_SHOW_USER_USAGE", [('user', user)])
 
     def getUserLimits (self, user):
-        
-        """
-        Get User Limits
+        """Get User Limits
 
         Implements command CMD_API_SHOW_USER_CONFIG
 
@@ -227,14 +191,11 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#info
         """
-
         return self._executeCmd("CMD_API_SHOW_USER_CONFIG", [('user', user)])
 
 
     def getUserDomains (self, user):
-        
-        """
-        Get User Domains
+        """Get User Domains
 
         Implements command CMD_API_SHOW_USER_DOMAINS
 
@@ -242,13 +203,10 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#info
         """
-
         return self._executeCmd("CMD_API_SHOW_USER_DOMAINS", [('user', user)])
 
     def listResellerPackages (self):
-
-        """
-        List Reseller Packages
+        """List Reseller Packages
 
         Implements command CMD_API_PACKAGES_RESELLER
 
@@ -256,13 +214,10 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#package
         """
-
         return self._executeCmd("CMD_API_PACKAGES_RESELLER")
 
     def getResellerPackage (self, package):
-
-        """
-        Get Reseller Package
+        """Get Reseller Package
 
         Implements command CMD_API_PACKAGES_RESELLER
 
@@ -270,13 +225,10 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#package
         """
-
         return self._executeCmd("CMD_API_PACKAGES_RESELLER", [('package', package)])
 
     def listUserPackages (self):
-
-        """
-        List User Packages
+        """List User Packages
 
         Implements command CMD_API_PACKAGES_USER
 
@@ -284,13 +236,10 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#package
         """
-
         return self._executeCmd("CMD_API_PACKAGES_USER")
 
     def getUserPackage (self, package):
-
-        """
-        Get User Package
+        """Get User Package
 
         Implements command CMD_API_PACKAGES_USER
 
@@ -298,6 +247,4 @@ class Api (object):
 
         Method info: http://www.directadmin.com/api.html#package
         """
-
         return self._executeCmd("CMD_API_PACKAGES_USER", [('package', package)])
-
