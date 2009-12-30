@@ -15,7 +15,7 @@ To-Do:
 $Id$
 """
 
-__version__ = "$Revision: 7 $"
+__version__ = "$Revision$"
 
 import urllib2
 import urllib
@@ -63,11 +63,13 @@ class Api (object):
        cmd = command name
        parameters = dictionary of parameters (default: None)
        """
-       if parameters:
+       if parameters is not None:
            parameters = urllib.urlencode(parameters)
 
        request = urllib2.Request(self._getURL(cmd), parameters)
-       request.add_header('Authorization', 'Basic ' + base64.b64encode(self._username + ':' + self._password))
+       auth = "Basic %s" % base64.b64encode("%s:%s" % \
+                                            (self._username, self._password))
+       request.add_header('Authorization', auth)
        return self._handleResponse(urllib2.urlopen(request))
 
     def _getURL (self, cmd):
@@ -131,7 +133,7 @@ class Api (object):
         Method info: http://www.directadmin.com/api.html#showusers
         """
         parameters = None
-        if reseller:
+        if reseller is not None:
             parameters = [('reseller', reseller)]
 
         return self._executeCmd("CMD_API_SHOW_USERS", parameters)
