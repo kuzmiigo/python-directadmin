@@ -12,8 +12,11 @@ Author: Andrés Gattinoni <andresgattinoni@gmail.com>
 
 To-Do:
 - Add support for HTTPS
+
+$Id$
 """
-__version__ = 0.1
+
+__version__ = "$Revision$"
 
 import urllib2
 import urllib
