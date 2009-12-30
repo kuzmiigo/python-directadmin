@@ -16,7 +16,7 @@ To-Do:
 $Id$
 """
 
-__version__ = "$Revision$"
+__version__ = "$Revision: 7 $"
 
 import urllib2
 import urllib
