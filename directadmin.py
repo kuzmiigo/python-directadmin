@@ -112,7 +112,15 @@ class Api (object):
         if info.getheader('X-DirectAdmin') == 'unauthorized':
             raise ApiError("Invalid username or password")    
 
-        return urlparse.parse_qs(response.read())
+        response =  urlparse.parse_qs(response.read())
+        if 'error' in response:
+            if 'details' in response:
+                raise ApiError(response['details'][0])
+            else:
+                raise ApiError("Uknown error detected")
+        elif 'list[]' in response:
+            return response['list[]']
+        return response 
 
     def listAllUsers (self):
 
@@ -126,7 +134,7 @@ class Api (object):
         Method info: http://www.directadmin.com/api.html#showallusers
         """
 
-        return self._executeCmd("CMD_API_SHOW_ALL_USERS")['list[]']
+        return self._executeCmd("CMD_API_SHOW_ALL_USERS")
 
     def listUsers (self, reseller=None):
 
@@ -145,7 +153,7 @@ class Api (object):
         if reseller:
             parameters = [('reseller', reseller)]
 
-        return self._executeCmd("CMD_API_SHOW_USERS", parameters)['list[]']
+        return self._executeCmd("CMD_API_SHOW_USERS", parameters)
 
     def listResellers (self):
 
@@ -159,7 +167,7 @@ class Api (object):
         Method info: http://www.directadmin.com/api.html#showresellers
         """
 
-        return self._executeCmd("CMD_API_SHOW_RESELLERS")['list[]']
+        return self._executeCmd("CMD_API_SHOW_RESELLERS")
 
     def listAdmins (self):
 
@@ -173,4 +181,120 @@ class Api (object):
         Method info: http://www.directadmin.com/api.html#showradmins
         """
 
-        return self._executeCmd("CMD_API_SHOW_ADMINS")['list[]']
+        return self._executeCmd("CMD_API_SHOW_ADMINS")
+
+
+    def getServerStats (self):
+        
+        """
+        Get Server Statistics
+
+        Implements command CMD_API_ADMIN_STATS
+
+        Returns a dictionary with information of the server.
+
+        Method info: http://www.directadmin.com/api.html#info
+        """
+
+        return self._executeCmd("CMD_API_ADMIN_STATS")
+
+    def getUserUsage (self, user):
+        
+        """
+        Get User Usage
+
+        Implements command CMD_API_SHOW_USER_USAGE
+
+        Returns a dictionary with the usage information for a user
+
+        Method info: http://www.directadmin.com/api.html#info
+        """
+
+        return self._executeCmd("CMD_API_SHOW_USER_USAGE", [('user', user)])
+
+    def getUserLimits (self, user):
+        
+        """
+        Get User Limits
+
+        Implements command CMD_API_SHOW_USER_CONFIG
+
+        Returns a dictionary with the user's upper limits 
+        and settings that defines their account
+
+        Method info: http://www.directadmin.com/api.html#info
+        """
+
+        return self._executeCmd("CMD_API_SHOW_USER_CONFIG", [('user', user)])
+
+
+    def getUserDomains (self, user):
+        
+        """
+        Get User Domains
+
+        Implements command CMD_API_SHOW_USER_DOMAINS
+
+        Returns a list of domains owned by the user
+
+        Method info: http://www.directadmin.com/api.html#info
+        """
+
+        return self._executeCmd("CMD_API_SHOW_USER_DOMAINS", [('user', user)])
+
+    def listResellerPackages (self):
+
+        """
+        List Reseller Packages
+
+        Implements command CMD_API_PACKAGES_RESELLER
+
+        Returns the list of all available reseller packages
+
+        Method info: http://www.directadmin.com/api.html#package
+        """
+
+        return self._executeCmd("CMD_API_PACKAGES_RESELLER")
+
+    def getResellerPackage (self, package):
+
+        """
+        Get Reseller Package
+
+        Implements command CMD_API_PACKAGES_RESELLER
+
+        Returns the information of a reseller package
+
+        Method info: http://www.directadmin.com/api.html#package
+        """
+
+        return self._executeCmd("CMD_API_PACKAGES_RESELLER", [('package', package)])
+
+    def listUserPackages (self):
+
+        """
+        List User Packages
+
+        Implements command CMD_API_PACKAGES_USER
+
+        Returns the list of all available user packages
+
+        Method info: http://www.directadmin.com/api.html#package
+        """
+
+        return self._executeCmd("CMD_API_PACKAGES_USER")
+
+    def getUserPackage (self, package):
+
+        """
+        Get User Package
+
+        Implements command CMD_API_PACKAGES_USER
+
+        Returns the information of a user package
+
+        Method info: http://www.directadmin.com/api.html#package
+        """
+
+        return self._executeCmd("CMD_API_PACKAGES_USER", [('package', package)])
+
