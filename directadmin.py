@@ -110,21 +110,21 @@ class ResellerUser (User):
     Usage:
 
     # Define a Reseller with a Reseller Package
-    reseller = ResellerUser('username', \
-                            'email@domain.com', \
-                            'password', \
-                            'domain.com', \
-                            'package_1', \
+    reseller = ResellerUser('username', 
+                            'email@domain.com', 
+                            'password', 
+                            'domain.com', 
+                            'package_1', 
                             'shared')
 
     OR
 
     # Define a Reseller with a custom configuration
-    reseller = ResellerUser('username', \
-                            'email@domain.com', \
-                            'password', \
-                            'domain.com', \
-                            None, \
+    reseller = ResellerUser('username', 
+                            'email@domain.com', 
+                            'password', 
+                            'domain.com', 
+                            None, 
                             'shared')
     reseller['bandwidth'] = 1024
     reseller['ubandwidth'] = "OFF"
@@ -273,21 +273,21 @@ class EndUser (User):
     Usage:
 
     # Define an End User with a package
-    user = EndUser('username', \
-                   'email@domain.com', \
-                   'password', \
-                   'domain.com', \
-                   'package_1', \
+    user = EndUser('username', 
+                   'email@domain.com', 
+                   'password', 
+                   'domain.com', 
+                   'package_1', 
                    '65.65.65.65')
 
     OR
 
     # Define an End User with a custom configuration
-    user = EndUser('username', \
-                   'email@domain.com', \
-                   'password', \
-                   'domain.com', \
-                   None, \
+    user = EndUser('username', 
+                   'email@domain.com', 
+                   'password', 
+                   'domain.com', 
+                   None, 
                    '65.65.65.65')
     reseller['bandwidth'] = 1024
     reseller['ubandwidth'] = "OFF"
@@ -717,6 +717,24 @@ class Api (object):
                  Admins/Resellers/Users to suspend
         """
         return self._handle_suspensions(users, False)
+
+    def save_user_email (self, email, domain):
+        """Save user email
+
+        Implements command CMD_API_CHANGE_INFO
+
+        Updates the email address for the logged user. 
+        This does not affect the email address for the 
+        ticketing/messaging system.
+
+        Parameteres:
+        email -- a valid email address
+        domain -- any of the user's domains
+        """
+        parameters = [('evalue', email), \
+                      ('domain', domain), \
+                      ('email', 'Save')]
+        return self._execute_cmd("CMD_APÎ_CHANGE_INFO", parameters)
 
     def list_all_users (self):
         """List All Users
