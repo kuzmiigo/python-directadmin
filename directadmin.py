@@ -621,8 +621,8 @@ class Api (object):
         Deletes an account of *ANY* type
 
         Parameters:
-        username -- name of the Admin/Reseller/User to delete
-                    it can also be a User object
+        user -- name of the Admin/Reseller/User to delete
+                it can also be a User object
         """
         if isinstance(user, User):
             username = user['username']
@@ -632,6 +632,91 @@ class Api (object):
                       ('delete', 'yes'), \
                       ('select0', username)]
         return self._execute_cmd("CMD_API_SELECT_USERS", parameters)
+
+    def _handle_suspensions (self, users, suspend):
+        """Handle suspension
+
+        Internal method to handle suspensions/unsuspensions
+        of one or more users
+
+        Parameters:
+        users -- list of users to apply the suspension/unsuspension
+                 the list can contain either usernames or User objects
+        suspend -- boolean (suspend/unsuspend)
+        """
+        # Init params
+        parameters = []
+
+        # Define if we're suspending or unsuspending
+        if suspend:
+            parameters.append(('dosuspend', 'yes'))
+        else:
+            parameters.append(('dounsuspend', 'yes'))
+
+        # Add all the users to the list
+        n=0
+        for user in users:
+            if isinstance(user, User):
+                username = user['username']
+            else:
+                username = user
+            parameters.append(('select%d' % n, username))
+            n = n + 1
+
+        # Do the magic
+        return self._execute_cmd("CMD_API_SELECT_USERS", parameters)
+
+    def suspend_account (self, user):
+        """Suspend account
+
+        Implements command CMD_API_SELEC_USERS
+
+        Suspends an account of *ANY* type
+
+        Parameters:
+        user -- name of the Admin/Reseller/User to suspend
+                it can also be a User object
+        """
+        return self._handle_suspensions([user], True)
+
+    def suspend_accounts (self, users):
+        """Suspend accounts
+
+        Implements command CMD_API_SELEC_USERS
+
+        Suspends a list of accounts of *ANY* type
+
+        Parameters:
+        users -- list of names or User objects of the 
+                 Admins/Resellers/Users to suspend
+        """
+        return self._handle_suspensions(users, True)
+
+    def unsuspend_account (self, user):
+        """Unsuspend account
+
+        Implements command CMD_API_SELEC_USERS
+
+        Unsuspends an account of *ANY* type
+
+        Parameters:
+        user -- name of the Admin/Reseller/User to unsuspend
+                it can also be a User object
+        """
+        return self._handle_suspensions([user], False)
+
+    def unsuspend_accounts (self, users):
+        """Unsuspend accounts
+
+        Implements command CMD_API_SELEC_USERS
+
+        Unsuspends a list of accounts of *ANY* type
+
+        Parameters:
+        users -- list of names or User objects of the 
+                 Admins/Resellers/Users to suspend
+        """
+        return self._handle_suspensions(users, False)
 
     def list_all_users (self):
         """List All Users
