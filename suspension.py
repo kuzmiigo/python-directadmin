@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Suspension - A simple script to handle Directadmin's users suspensions
+
+This file is part of python-directadmin.
+
+python-directadmin is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+python-directadmin is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with python-directadmin.  If not, see <http://www.gnu.org/licenses/>.
+
+Author: Andrés Gattinoni
+$Id$
+
+Usage: suspension.py [options] suspend|unsuspend <username>
+
+Suspension is a simple script for suspending/unsuspending Directadmin users
+
+Options:
+--version             show program's version number and exit
+-h, --help            show this help message and exit
+-u USERNAME, --user=USERNAME
+                      Directadmin admin/reseller username
+-p PASSWORD, --password=PASSWORD
+                      Directadmin admin/reseller password
+-H HOSTNAME, --host=HOSTNAME
+                      Directadmin hostname (default: localhost)
+-P PORT, --port=PORT  Directadmin port (default: 2222)
+
+Examples:
+
+./suspension.py -u admin -H mydirectadminserver.com suspend baduser
+
+./suspension.py unsuspend fineuser
+"""
+
+__author__ = "Andrés Gattinoni <andresgattinoni@gmail.com>"
+__version__ = "$Revision$"
+
+import sys
+import getpass
+from optparse import OptionParser
+import directadmin
+
+def main ():
+    """
+    Main function
+
+    Here's where all the magic happens.
+    This functions is mostly meant to handle user input
+    and call Directadmin's API to handle suspensions
+    """
+
+    # Build an option parser
+    parser = OptionParser(usage='%prog [options] suspend|unsuspend <username>', \
+                          version=__version__, \
+                          description="Suspension is a simple script for suspending/unsuspending Directadmin users")
+    parser.add_option('-u', '--user', dest='user', \
+                      help='Directadmin admin/reseller username', \
+                      metavar='USERNAME', default=None)
+    parser.add_option('-p', '--password', dest='password', \
+                      help='Directadmin admin/reseller password', \
+                      metavar='PASSWORD', default=None)
+    parser.add_option('-H', '--host', dest='host', \
+                      help='Directadmin hostname (default: localhost)', \
+                      metavar='HOSTNAME', default="localhost")
+    parser.add_option('-P', '--port', dest='port', \
+                      help='Directadmin port (default: 2222)', \
+                      metavar='PORT', default=2222)
+
+    # Parse options and do some input checking
+    (option, args) = parser.parse_args()
+    if not args or len(args) > 2:
+        parser.error("You need to specify an action (suspend or unsuspend) and a user")
+        return 1
+
+    if args[0] not in ("suspend", "unsuspend"):
+        parser.error('Unrecognised action: %s. Should be "suspend" or "unsuspend"' % \
+                      args[0])
+        return 2
+
+    # If we don't have user or password, ask 
+    # for it interactively
+    if not option.user:
+        option.user = raw_input("Admin username: ")
+
+    if not option.password:
+        option.password = getpass.getpass("Password: ")
+
+    # Get an API instance
+    api = directadmin.Api(option.user, \
+                          option.password, \
+                          option.host, \
+                          option.port)
+
+    # Do the suspension/unsuspension
+    if args[0] == "suspend":
+        if api.suspend_account(args[1]):
+            print "User %s succesfuly suspended" % args[1]
+        else:
+            print "Failed to suspend user %s" % args[1]
+            return 3
+    else:
+        if api.unsuspend_account(args[1]):
+            print "User %s succesfuly unsuspended" % args[1]
+        else:
+            print "Failed to unsuspend user %s" % args[1]
+            return 4
+
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
