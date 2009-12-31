@@ -49,6 +49,374 @@ class ApiError (Exception):
     """
     pass
 
+class User (object):
+    """User
+
+    Abstract representation of a Directadmin Panel User
+    """
+    _properties = {'username': None, \
+                   'email': None, \
+                   'passwd': None, \
+                   'passwd2': None}
+
+    def __init__ (self, username, email, password):
+        """Constructor
+
+        Initializes the object with the basic information
+        for all kinds of users
+
+        Parameters:
+        username -- Admin's username 4-8 alphanumeric characters
+        email -- a valid email address
+        password -- Admin's password, +5 ascii characters
+        """
+        self._properties['username'] = username
+        self._properties['email'] = email
+        self._properties['passwd'] = password
+        self._properties['passwd2'] = password
+
+    def __getitem__ (self, key):
+        """Returns a user property"""
+        return self._properties[key]
+
+    def __setitem__ (self, key, value):
+        """Sets a user property"""
+        self._properties[key] = value
+
+    def update (self, dict):
+        """Updates the properties dictionary"""
+        return self._properties.update(dict)
+
+    def getList (self):
+        """Returns a list of tuples with all the
+           properties of the User, to be sent in API commands"""
+        list = []
+        for key, value in self._properties.items():
+            list.append((key, value))
+        return list
+
+class AdminUser (User):
+    """AdminUser
+
+    Represents a Directadmin's Admin
+    """
+    pass
+
+class ResellerUser (User):
+    """ResellerUser
+
+    Represents a Directadmin's reseller user
+
+    Usage:
+
+    # Define a Reseller with a Reseller Package
+    reseller = ResellerUser('username', \
+                            'email@domain.com', \
+                            'password', \
+                            'domain.com', \
+                            'package_1', \
+                            'shared')
+
+    OR
+
+    # Define a Reseller with a custom configuration
+    reseller = ResellerUser('username', \
+                            'email@domain.com', \
+                            'password', \
+                            'domain.com', \
+                            None, \
+                            'shared')
+    reseller['bandwidth'] = 1024
+    reseller['ubandwidth'] = "OFF"
+
+    Available properties:
+
+        username        -- Admin's username 4-8 alphanumeric characters
+        email           -- a valid email address
+        password        -- Admin's password, +5 ascii characters
+        domain          -- A valid domain name in the form: domain.com
+        package         -- One of the Reseller packages created by an admin
+                           (default: None)
+        ip              -- shared or assign. If shared, domain will use the
+                           server's main ip. assign will use one of the reseller's ips
+                           (default: shared)
+        
+        bandwidth       -- Amount of bandwidth Reseller will be allowed to use.
+                           Number, in Megabytes
+        ubandwidth      -- ON or OFF. If ON, bandwidth is ignored and no limit is set
+        quota           -- Amount of disk space Reseller will be allowed to use.
+                           Number, in Megabytes
+        uquota          -- ON or OFF. If ON, quota is ignored and no limit is set
+        vdomains        -- Number of domains the reseller and his/her User's are
+                           allowed to create
+        uvdomains       -- ON or OFF. If ON, vdomains is ignored and no limit is set
+        nsubdomains     -- Number of subdomains the reseller and his/her User's are
+                           allowed to create
+        unsubdomains    -- ON or OFF. If ON, nsubdomains is ignored and no limit is set
+        ips             -- Number of ips that will be allocated to the Reseller upon
+                           account during account
+        nemails         -- Number of pop accounts the reseller and his/her User's are
+                           allowed to create
+        unemails        -- ON or OFF Unlimited option for nemails
+        nemailf         -- Number of forwarders the reseller and his/her User's are
+                           allowed to create
+        unemailf        -- ON or OFF Unlimited option for nemailf
+        nemailml        -- Number of mailing lists the reseller and his/her User's are
+                           allowed to create
+        unemailml       -- ON or OFF Unlimited option for nemailml
+        nemailr         -- Number of autoresponders the reseller and his/her User's are
+                           allowed to create
+        unemailr        -- ON or OFF Unlimited option for nemailr
+        mysql           -- Number of MySQL databases the reseller and his/her User's are
+                           allowed to create
+        umysql          -- ON or OFF Unlimited option for mysql
+        domainptr       -- Number of domain pointers the reseller and his/her User's are
+                           allowed to create
+        udomainptr      -- ON or OFF Unlimited option for domainptr
+        ftp             -- Number of ftp accounts the reseller and his/her User's are
+                           allowed to create
+        uftp            -- ON or OFF Unlimited option for ftp
+        aftp            -- ON or OFF If ON, the reseller and his/her users will be
+                           able to have anonymous ftp accounts.
+        php             -- ON or OFF If ON, the reseller and his/her users will
+                           have the ability to run php scripts.
+        cgi             -- ON or OFF If ON, the reseller and his/her users will
+                           have the ability to run cgi scripts in their cgi-bins.
+        ssl             -- ON or OFF If ON, the reseller and his/her users will
+                           have the ability to access their websites through secure https://.
+        ssh             -- ON or OFF If ON, the reseller will be have an ssh account.
+        userssh         -- ON or OFF If ON, the reseller will be allowed to create
+                           ssh accounts for his/her users.
+        dnscontrol      -- ON or OFF If ON, the reseller will be able to modify his/her
+                           dns records and to create users with or without this option.
+        dns             -- "OFF" or "TWO" or "THREE".
+                           If OFF, no dns's will be created.
+                           TWO: domain ip for ns1 and another ip for ns2.
+                           THREE: domain has own ip. ns1 and ns2 have their own ips
+        serverip        -- ON or OFF If ON, the reseller will have the ability to
+                           create users using the servers main ip.
+    """
+    def __init__ (self,  \
+                  username, \
+                  email, \
+                  password, \
+                  domain, \
+                  package=None, \
+                  ip="shared"):
+        """Constructor
+
+        Initializes the Reseller user
+
+        Parameters:
+        username        -- Admin's username 4-8 alphanumeric characters
+        email           -- a valid email address
+        password        -- Admin's password, +5 ascii characters
+        domain          -- A valid domain name in the form: domain.com
+        package         -- One of the Reseller packages created by an admin
+                           (default: None)
+        ip              -- shared or assign. If shared, domain will use the
+                           server's main ip. assign will use one of the reseller's ips
+                           (default: shared)
+        """
+        User.__init__(self, username, email, password)
+        self['domain'] = domain
+        self['ip'] = ip
+        if package is not None:
+            self['package'] = package
+        else:
+            self.update(self._getDefaultConfig())
+
+    def _getDefaultConfig (self):
+        """Get dafault config
+        
+        Returns a dictionary with the default
+        configuration for a reseller user
+        """
+        return {'bandwidth': 0,
+                'ubandwidth': "OFF",
+                'quota': 0,
+                'uquota': "OFF", 
+                'vdomains': 0, 
+                'uvdomains': "OFF", 
+                'nsubdomains': 0, 
+                'unsubdomains': "OFF", 
+                'ips': 0, 
+                'nemails': 0, 
+                'unemails': "OFF", 
+                'nemailf': 0, 
+                'unemailf': "OFF", 
+                'nemailml': 0, 
+                'unemailml': "OFF", 
+                'nemailr': 0, 
+                'unemailr': "OFF", 
+                'mysql': 0, 
+                'umysql': "OFF", 
+                'domainptr': 0, 
+                'udomainptr': "OFF", 
+                'ftp': 0, 
+                'uftp': "OFF", 
+                'aftp': "OFF", 
+                'php': "ON", 
+                'cgi': "ON", 
+                'ssl': "OFF", 
+                'ssh': "OFF", 
+                'userssh': "OFF", 
+                'dnscontrol': "OFF", 
+                'dns': "OFF", 
+                'serverip': "OFF"}
+    
+class EndUser (User):
+    """EndUser
+
+    Represents a Directadmin's end user
+
+    Usage:
+
+    # Define an End User with a package
+    user = EndUser('username', \
+                   'email@domain.com', \
+                   'password', \
+                   'domain.com', \
+                   'package_1', \
+                   '65.65.65.65')
+
+    OR
+
+    # Define an End User with a custom configuration
+    user = EndUser('username', \
+                   'email@domain.com', \
+                   'password', \
+                   'domain.com', \
+                   None, \
+                   '65.65.65.65')
+    reseller['bandwidth'] = 1024
+    reseller['ubandwidth'] = "OFF"
+
+    Available properties:
+
+        username        -- Admin's username 4-8 alphanumeric characters
+        email           -- a valid email address
+        password        -- Admin's password, +5 ascii characters
+        domain          -- A valid domain name in the form: domain.com
+        package         -- One of the User packages created by the Reseller
+                           (default: None)
+        ip              -- One of the ips which is available for user creation. 
+                           Only free or shared ips are allowed.
+
+        bandwidth       -- Amount of bandwidth User will be allowed to use. 
+                           Number, in Megabytes
+        ubandwidth      -- ON or OFF. If ON, bandwidth is ignored and no limit is set
+        quota           -- Amount of disk space User will be allowed to use. 
+                           Number, in Megabytes
+        uquota          -- ON or OFF. If ON, quota is ignored and no limit is set
+        vdomains        -- Number of domains the User will be allowed to create
+        uvdomains       -- ON or OFF. If ON, vdomains is ignored and no limit is set
+        nsubdomains     -- Number of subdomains the User will be allowed to create
+        unsubdomains    -- ON or OFF. If ON, nsubdomains is ignored and no limit is set
+        nemails         -- Number of pop accounts the User will be allowed to create
+        unemails        -- ON or OFF Unlimited option for nemails
+        nemailf         -- Number of forwarders the User will be allowed to create
+        unemailf        -- ON or OFF Unlimited option for nemailf
+        nemailml        -- Number of mailing lists the User will be allowed to create
+        unemailml       -- ON or OFF Unlimited option for nemailml
+        nemailr         -- Number of autoresponders the User will be allowed to create
+        unemailr        -- ON or OFF Unlimited option for nemailr
+        mysql           -- Number of MySQL databases the User will be allowed to create
+        umysql          -- ON or OFF Unlimited option for mysql
+        domainptr       -- Number of domain pointers the User will be allowed to create
+        udomainptr      -- ON or OFF Unlimited option for domainptr
+        ftp             -- Number of ftp accounts the User will be allowed to create
+        uftp            -- ON or OFF Unlimited option for ftp
+        aftp            -- ON or OFF If ON, the User will 
+                           be able to have anonymous ftp accounts.
+        cgi             -- ON or OFF If ON, the User will 
+                           have the ability to run cgi scripts in their cgi-bin.
+        php             -- ON or OFF If ON, the User will 
+                           have the ability to run php scripts.
+        spam            -- ON or OFF If ON, the User will 
+                           have the ability to run scan email with SpamAssassin.
+        cron            -- ON or OFF If ON, the User will 
+                           have the ability to creat cronjobs.
+        catchall        -- ON or OFF If ON, the User will 
+                           have the ability to enable and customize 
+                           a catch-all email (*@domain.com).
+        ssl             -- ON or OFF If ON, the User will 
+                           have the ability to access their websites 
+                           through secure https://.
+        ssh             -- ON or OFF If ON, the User will have an ssh account.
+        sysinfo         -- ON or OFF If ON, the User will 
+                           have access to a page that shows the system information.
+        dnscontrol      -- ON or OFF If ON, the User will 
+                           be able to modify his/her dns records.
+    """
+    def __init__ (self,  \
+                  username, \
+                  email, \
+                  password, \
+                  domain, \
+                  package=None, \
+                  ip=None):
+        """Constructor
+
+        Initializes the Reseller user
+
+        Parameters:
+        username        -- Admin's username 4-8 alphanumeric characters
+        email           -- a valid email address
+        password        -- Admin's password, +5 ascii characters
+        domain          -- A valid domain name in the form: domain.com
+        package         -- One of the User packages created by the Reseller
+                           (default: None)
+        ip              -- One of the ips which is available for user creation. 
+                           Only free or shared ips are allowed.
+        """
+        User.__init__(self, username, email, password)
+        self['domain'] = domain
+        self['ip'] = ip
+        if package is not None:
+            self['package'] = package
+        else:
+            self.update(self._getDefaultConfig())
+
+    def _getDefaultConfig (self):
+        """Get dafault config
+        
+        Returns a dictionary with the default
+        configuration for a reseller user
+        """
+        return {'bandwidth': 0, 
+                'ubandwidth': "OFF", 
+                'quota': 0, 
+                'uquota': "OFF", 
+                'vdomains': 0, 
+                'uvdomains': "OFF", 
+                'nsubdomains': 0, 
+                'unsubdomains': "OFF", 
+                'nemails': 0, 
+                'unemails': "OFF", 
+                'nemailf': 0, 
+                'unemailf': "OFF", 
+                'nemailml': 0, 
+                'unemailml': "OFF", 
+                'nemailr': 0, 
+                'unemailr': "OFF", 
+                'mysql': 0, 
+                'umysql': "OFF", 
+                'domainptr': 0, 
+                'udomainptr': "OFF", 
+                'ftp': 0, 
+                'uftp': "OFF", 
+                'aftp': "OFF", 
+                'cgi': "ON", 
+                'php': "ON", 
+                'spam': "ON", 
+                'cron': "ON", 
+                'catchall': "OFF", 
+                'ssl': "OFF", 
+                'ssh': "OFF", 
+                'sysinfo': "OFF", 
+                'dnscontrol': "OFF"}
+
 class Api (object):
     """API
 
@@ -151,13 +519,6 @@ class Api (object):
         else:
             return response
 
-    def _on_off (self, bool):
-        """Translates a boolean to "ON"/"OFF" """
-        if bool:
-            return "ON"
-        else:
-            return "OFF"
-
     def _yes_no (self, bool):
         """Translates a boolean to "yes"/"no" """
         if bool:
@@ -165,11 +526,7 @@ class Api (object):
         else:
             return "no"
 
-    def create_admin (self, \
-                      username, \
-                      email, \
-                      password, \
-                      notify=True):
+    def create_admin (self, admin_user, notify=True):
         """Create admin
 
         Implements command CMD_API_ACCOUNT_ADMIN
@@ -177,163 +534,86 @@ class Api (object):
         Creates a new admin user
 
         Parameters:
-        username -- Admin's username 4-8 alphanumeric characters
-        email -- a valid email address
-        password -- Admin's password, +5 ascii characters
+        admin_user -- AdminUser object with the information of the
+                      admin to create
         notify -- boolean: if true sends a notification email
+
+        Raises TypeError if admin_user is not an AdminUser object
         """
-        notify = _yes_no(notify)
+        if not isinstance(admin_user, AdminUser):
+            raise TypeError("admin_user must be an AdminUser object")
+
         parameters = [('action', 'create'), \
-                      ('username', username), \
-                      ('email', email), \
-                      ('passwd', password), \
-                      ('passwd2', password), \
-                      ('notify', notify)]
+                      ('add', 'Submit'), \
+                      ('notify', self._yes_no(notify))]
+        parameters.extend(admin_user.getList())
         return self._execute_cmd("CMD_API_ACCOUNT_ADMIN", parameters)
 
-    def create_reseller (self, \
-                         username, \
-                         email, \
-                         passwd, \
-                         domain, \
-                         package=None, \
-                         ip="shared", \
-                         notify=True,
-                         **keywords):
+    def create_reseller (self, reseller_user, notify=True):
         """Create reseller
 
         Implements command CMD_API_ACCOUNT_RESELLER
 
         Creates a reseller assigning him a reseller package
         or with a custom configuration.
-        If the package is sent as None, then the custom configuration
-        will apply.
 
-        Mandatory parameters:
-            username        -- The Reseller's username. 4-8 characters, alphanumeric
-            email           -- A valid email address
-            password        -- The admins password. 5+ characters, ascii
-            domain          -- A valid domain name in the form: domain.com
-            package         -- One of the Reseller packages created by an admin
-            ip              -- shared or assign. If shared, domain will use the
-                               server's main ip. assign will use one of the reseller's ips
-            notify          -- Boolean. If true, an email will be sent to email
+        Parameters:
+        reseller_user -- ResellerUser object
+        notify -- boolean: if true sends a notification email
 
-        Custom configuration parameters (apply if package is None)
-            bandwidth       -- Amount of bandwidth Reseller will be allowed to use.
-                               Number, in Megabytes
-            ubandwidth      -- ON or OFF. If ON, bandwidth is ignored and no limit is set
-            quota           -- Amount of disk space Reseller will be allowed to use.
-                               Number, in Megabytes
-            uquota          -- ON or OFF. If ON, quota is ignored and no limit is set
-            vdomains        -- Number of domains the reseller and his/her User's are
-                               allowed to create
-            uvdomains       -- ON or OFF. If ON, vdomains is ignored and no limit is set
-            nsubdomains     -- Number of subdomains the reseller and his/her User's are
-                               allowed to create
-            unsubdomains    -- ON or OFF. If ON, nsubdomains is ignored and no limit is set
-            ips             -- Number of ips that will be allocated to the Reseller upon
-                               account during account
-            nemails         -- Number of pop accounts the reseller and his/her User's are
-                               allowed to create
-            unemails        -- ON or OFF Unlimited option for nemails
-            nemailf         -- Number of forwarders the reseller and his/her User's are
-                               allowed to create
-            unemailf        -- ON or OFF Unlimited option for nemailf
-            nemailml        -- Number of mailing lists the reseller and his/her User's are
-                               allowed to create
-            unemailml       -- ON or OFF Unlimited option for nemailml
-            nemailr         -- Number of autoresponders the reseller and his/her User's are
-                               allowed to create
-            unemailr        -- ON or OFF Unlimited option for nemailr
-            mysql           -- Number of MySQL databases the reseller and his/her User's are
-                               allowed to create
-            umysql          -- ON or OFF Unlimited option for mysql
-            domainptr       -- Number of domain pointers the reseller and his/her User's are
-                               allowed to create
-            udomainptr      -- ON or OFF Unlimited option for domainptr
-            ftp             -- Number of ftp accounts the reseller and his/her User's are
-                               allowed to create
-            uftp            -- ON or OFF Unlimited option for ftp
-            aftp            -- ON or OFF If ON, the reseller and his/her users will be
-                               able to have anonymous ftp accounts.
-            php             -- ON or OFF If ON, the reseller and his/her users will
-                               have the ability to run php scripts.
-            cgi             -- ON or OFF If ON, the reseller and his/her users will
-                               have the ability to run cgi scripts in their cgi-bins.
-            ssl             -- ON or OFF If ON, the reseller and his/her users will
-                               have the ability to access their websites through secure https://.
-            ssh             -- ON or OFF If ON, the reseller will be have an ssh account.
-            userssh         -- ON or OFF If ON, the reseller will be allowed to create
-                               ssh accounts for his/her users.
-            dnscontrol      -- ON or OFF If ON, the reseller will be able to modify his/her
-                               dns records and to create users with or without this option.
-            dns             -- "OFF" or "TWO" or "THREE".
-                               If OFF, no dns's will be created.
-                               TWO: domain ip for ns1 and another ip for ns2.
-                               THREE: domain has own ip. ns1 and ns2 have their own ips
-            serverip        -- ON or OFF If ON, the reseller will have the ability to
-                               create users using the servers main ip.
+        Raises TypeError if reseller_user is not an ResellerUser object
         """
-        options = {'bandwidth' : 0,
-                   'ubandwidth' : "OFF",
-                   'quota' : 0,
-                   'uquota' : "OFF", 
-                   'vdomains' : 0, 
-                   'uvdomains' : "OFF", 
-                   'nsubdomains' : 0, 
-                   'unsubdomains' : "OFF", 
-                   'ips' : 0, 
-                   'nemails' : 0, 
-                   'unemails' : "OFF", 
-                   'nemailf' : 0, 
-                   'unemailf' : "OFF", 
-                   'nemailml' : 0, 
-                   'unemailml' : "OFF", 
-                   'nemailr' : 0, 
-                   'unemailr' : "OFF", 
-                   'mysql' : 0, 
-                   'umysql' : "OFF", 
-                   'domainptr' : 0, 
-                   'udomainptr' : "OFF", 
-                   'ftp' : 0, 
-                   'uftp' : "OFF", 
-                   'aftp' : "OFF", 
-                   'php' : "ON", 
-                   'cgi' : "ON", 
-                   'ssl' : "OFF", 
-                   'ssh' : "OFF", 
-                   'userssh' : "OFF", 
-                   'dnscontrol' : "OFF", 
-                   'dns' : "OFF", 
-                   'serverip' : "OFF"}
+        if not isinstance(reseller_user, ResellerUser):
+            raise TypeError("reseller_user must be an ResellerUser object")
 
-        parameters = [('username', username), \
-                      ('email', email), \
-                      ('passwd', password), \
-                      ('passwd2', password), \
-                      ('domain', domain), \
-                      ('ip', ip), \
-                      ('notify', _yes_no(notify))]
+        parameters = [('action', 'create'), \
+                      ('add', 'Submit'), \
+                      ('notify', self._yes_no(notify))]
 
-        # Check if we will set a package or create a custom config
-        if package is not None:
-            parameters.append(('package', package))
-        else:
-            # Iterate through all the options
-            for key, value in options:
-                # If we are receiving the option as a parameter
-                # then we append the value of the parameter
-                if key in keywords:
-                    parameters.append((key, keywords[key]))
-                # else, we append the default value
-                else:
-                    parameters.append((key, value))
-
+        parameters.extend(reseller_user.getList())
         return self._execute_cmd("CMD_API_ACCOUNT_RESELLER", parameters)
 
+    def create_user (self, end_user, notify=True):
+        """Create user
 
-    def delete_account (self, username):
+        Implements command CMD_API_ACCOUNT_USER
+
+        Creates an end user assigning him a package
+        or with a custom configuration.
+
+        Parameters:
+        end_user -- EndUser object
+        notify -- boolean: if true sends a notification email
+
+        Raises TypeError if end_user is not an EndUser object
+        """
+        if not isinstance(end_user, EndUser):
+            raise TypeError("end_user must be an EndUser object")
+
+        parameters = [('action', 'create'), \
+                      ('add', 'Submit'), \
+                      ('notify', self._yes_no(notify))]
+        parameters.extend(end_user.getList())
+        return self._execute_cmd("CMD_API_ACCOUNT_USER", parameters)
+
+    def show_ips (self, ip=None):
+        """Show IPs
+
+        Implements command CMD_API_SHOW_RESELLER_IPS
+
+        Gets the list of IPs owned by the reseller or provides
+        information for a single IP if provided
+
+        Parameters:
+        ip -- IP address (optional)
+        """
+        parameters = None
+        if ip is not None:
+            parameters = [('ip', ip)]
+
+        return self._execute_cmd("CMD_API_SHOW_RESELLER_IPS", parameters)
+
+    def delete_account (self, user):
         """Delete account
 
         Implements command CMD_API_SELECT_USERS
@@ -342,7 +622,12 @@ class Api (object):
 
         Parameters:
         username -- name of the Admin/Reseller/User to delete
+                    it can also be a User object
         """
+        if isinstance(user, User):
+            username = user['username']
+        else:
+            username = user
         parameters = [('confirmed', 'Confirm'), \
                       ('delete', 'yes'), \
                       ('select0', username)]
