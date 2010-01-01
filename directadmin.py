@@ -417,10 +417,11 @@ class EndUser (User):
                 'sysinfo': "OFF", 
                 'dnscontrol': "OFF"}
 
-class Api (object):
-    """API
+class ApiConnector (object):
+    """API Connector
 
-    Directadmin API implementation
+    Basic object to handle API connection.
+    Connect and send commands.
     """
     _hostname = None
     _port = 0
@@ -441,7 +442,7 @@ class Api (object):
         self._username = username
         self._password = password
 
-    def _execute_cmd (self, cmd, parameters=None):
+    def execute (self, cmd, parameters=None):
        """Execute command
 
        Executes a command of the API
@@ -518,6 +519,31 @@ class Api (object):
         # On any other case return the whole structure
         else:
             return response
+
+class Api (object):
+    """API
+
+    Directadmin API implementation
+    """
+    _connector = None
+
+    def __init__ (self, username, password, \
+                  hostname, port=2222):
+        """Constructor
+
+        Initializes the connection for the API
+        """
+        self._connector = ApiConnector(username, \
+                                       password, \
+                                       hostname, \
+                                       port)
+
+    def _execute_cmd (self, cmd, parameters=None):
+       """Execute command
+
+       Executes a command using the Connection object
+       """
+       return self._connector.execute(cmd, parameters)
 
     def _yes_no (self, bool):
         """Translates a boolean to "yes"/"no" """
@@ -791,10 +817,34 @@ class Api (object):
         Implements command CMD_API_ADMIN_STATS
 
         Returns a dictionary with information of the server.
+        Note that disk info is also returned as a dictionary
+        with the following keys:
+        - 'filesystem'
+        - 'blocks'
+        - 'used'
+        - 'available'
+        - 'usedpercent'
+        - 'mounted'
 
         Method info: http://www.directadmin.com/api.html#info
         """
-        return self._execute_cmd("CMD_API_ADMIN_STATS")
+        # Execute command
+        stats = self._execute_cmd("CMD_API_ADMIN_STATS")
+        
+        # Split disk info
+        options = ['filesystem', \
+                   'blocks', \
+                   'used', \
+                   'available', \
+                   'usedpercent', \
+                   'mounted']
+        for key in stats.keys():
+            if key.startswith('disk'):
+                items = stats[key][0].split(':')
+                stats[key][0] = {}
+                for option in options:
+                    stats[key][0][option] = items.pop(0)
+        return stats
 
     def get_user_usage (self, user):
         """Get User Usage
