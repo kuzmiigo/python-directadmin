@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Suspension - A simple script to handle Directadmin's users suspensions
+A simple script to handle Directadmin's users suspensions
 
 This file is part of python-directadmin.
 
