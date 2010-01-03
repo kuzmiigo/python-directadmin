@@ -449,7 +449,7 @@ class ApiConnector (object):
         self._port = int(port)
         self._username = username
         self._password = password
-        self._https = https
+        self._https = bool(https)
 
     def execute (self, cmd, parameters=None):
        """Execute command
@@ -576,7 +576,7 @@ class Api (object):
 
     def _yes_no (self, bool):
         """Translates a boolean to "yes"/"no" """
-        if bool:
+        if bool(bool):
             return "yes"
         else:
             return "no"
