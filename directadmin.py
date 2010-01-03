@@ -24,10 +24,10 @@ Proyect URL: http://code.google.com/p/python-directadmin/
 For more information about Directadmin's Web API, visit:
 http://www.directadmin.com/api.html
 
-Author: Andrés Gattinoni <andresgattinoni@gmail.com>
+For more information about this module use PyDOC:
+$ pydoc directadmin
 
-To-Do:
-- Add support for HTTPS
+Author: Andrés Gattinoni <andresgattinoni@gmail.com>
 
 $Id$
 """
@@ -427,20 +427,29 @@ class ApiConnector (object):
     _port = 0
     _username = None
     _password = None
+    _https = False
 
-    def __init__ (self, username, password, hostname, port=2222):
+    def __init__ (self, \
+                  username, \
+                  password, \
+                  hostname="localhost", \
+                  port=2222, \
+                  https=False):
         """Constructor
 
         Parameters:
         username = username to login on Directadmin
         password = password to login on Directadmin
-        hostname = Directadmin's hostname
+        hostname = Directadmin's hostname (default: localhost)
         port = port on which Directadmin listens (default: 2222)
+        https -- boolean, if True all transactions will
+                 be performed using HTTPS (default: False)
         """
         self._hostname = hostname
         self._port = int(port)
         self._username = username
         self._password = password
+        self._https = https
 
     def execute (self, cmd, parameters=None):
        """Execute command
@@ -473,8 +482,13 @@ class ApiConnector (object):
 
         Returns the URL for a specific command
         """
-        return 'http://%s:%d/%s' % \
-               (self._hostname, \
+        if self._https:
+            protocol = "https"
+        else:
+            protocol = "http"
+        return '%s://%s:%d/%s' % \
+               (protocol, \
+                self._hostname, \
                 self._port, \
                 cmd)
 
@@ -529,16 +543,29 @@ class Api (object):
     """
     _connector = None
 
-    def __init__ (self, username, password, \
-                  hostname, port=2222):
+    def __init__ (self, \
+                  username, \
+                  password, \
+                  hostname="localhost", \
+                  port=2222, \
+                  https=False):
         """Constructor
 
         Initializes the connection for the API
+        
+        Parameters:
+        username -- Directadmin username
+        password -- Directadmin password
+        hostname -- Directadmin server host (default: localhost)
+        port -- Directadmin server port (default: 2222)
+        https -- boolean, if True all transactions will
+                 be performed using HTTPS (default: False)
         """
         self._connector = ApiConnector(username, \
                                        password, \
                                        hostname, \
-                                       port)
+                                       port, \
+                                       https)
 
     def _execute_cmd (self, cmd, parameters=None):
        """Execute command
