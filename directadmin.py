@@ -511,6 +511,8 @@ class ApiConnector (object):
             else:
                 if 'details' in response:
                     raise ApiError(response['details'][0])
+                if 'text' in response:
+                    raise ApiError(response['text'][0])
                 else:
                     raise ApiError("Uknown error detected")
         # If we got a 'list[]' keyword, we return only the list
@@ -928,3 +930,204 @@ class Api (object):
         """
         return self._execute_cmd("CMD_API_PACKAGES_USER", \
                                  [('package', package)])
+
+    def list_domains (self):
+        """List domains
+
+        Implements command CMD_API_SHOW_DOMAINS
+
+        Returns a list of all the logged user's domains
+
+        Method info: http://www.directadmin.com/api.html#user_apis
+        """
+        return self._execute_cmd("CMD_API_SHOW_DOMAINS")
+
+    def list_subdomains (self, domain):
+        """List subdomains
+
+        Implements command CMD_API_SUBDOMAINS
+
+        Returns a list of all the logged user's subdomains
+
+        Method info: http://www.directadmin.com/api.html#user_apis
+
+        Parameters:
+        domain -- the domain to be shown
+        """
+        return self._execute_cmd("CMD_API_SUBDOMAINS", \
+                [('domain', domain)])
+
+    def create_subdomain (self, domain, subdomain):
+        """Create subdomain
+
+        Implements command CMD_API_SUBDOMAINS
+
+        Creates a new subdomain
+
+        Method info: http://www.directadmin.com/api.html#user_apis
+
+        Parameters:
+        domain -- main domain
+        subdomain -- subdomain to be created
+        """
+        parameters = [('action', 'create'), \
+                      ('domain', domain), \
+                      ('subdomain', subdomain)]
+        return self._execute_cmd("CMD_API_SUBDOMAINS", parameters)
+
+    def delete_subdomain (self, domain, subdomain, remove_contents=False):
+        """Delete subdomain
+
+        Implements command CMD_API_SUBDOMAINS
+
+        Deletes a subdomain.
+
+        Method info: http://www.directadmin.com/api.html#user_apis
+
+        Parameters:
+        domain -- main domain
+        subdomain -- subdomain to delete
+        remove_contents -- boolean, if True the directory 
+                           and its contents will be removed
+                           Default: False
+        """
+        parameters = [('action', 'delete'), \
+                      ('domain', domain), \
+                      ('select0', subdomain), \
+                      ('contents', self._yes_no(remove_contents))]
+        return self._execute_cmd("CMD_API_SUBDOMAINS", parameters)
+
+    def list_databases (self):
+        """List databases
+
+        Implements command CMD_API_DATABASES
+
+        Lists all the logged user's databases
+
+        Method info: http://www.directadmin.com/api.html#user_apis
+        """
+        return self._execute_cmd("CMD_API_DATABASES")
+
+    def create_database (self, name, user, password):
+        """Create database
+
+        Implements command CMD_API_DATABASES
+
+        Creates a new database for the logged user.
+
+        Method info: http://www.directadmin.com/api.html#user_apis
+
+        Parameters:
+        name -- database name (username_ will be prepended)
+        user -- database user (username_ will be prepended)
+        password -- username_user's password
+        """
+        parameters = [('action', 'create'), \
+                      ('name', name), \
+                      ('user', user), \
+                      ('passwd', password), \
+                      ('passwd2', password)]
+        return self._execute_cmd("CMD_API_DATABASES", parameters)
+
+    def delete_databases (self, dbs):
+        """Delete databases
+
+        Implements command CMD_API_DATABASES
+
+        Removes one or more databases.
+
+        Method info: http://www.directadmin.com/api.html#user_apis
+
+        Parameters:
+        dbs -- database name or list of databases names to delete
+        """
+        parameters = [('action', 'delete')]
+        if isinstance(dbs, list):
+            n = 0
+            for name in dbs:
+                parameters.append(('select%d' % n, name))
+                n = n + 1
+        else:
+            parameters.append(('selected0', dbs))
+
+        return self._execute_cmd("CMD_API_DATABASES", parameters)
+    
+    def update_pop_password (self, email, old_password, new_password):
+        """Update POP password
+
+        Implements command CMD_CHANGE_EMAIL_PASSWORD
+
+        Updates the password of a POP account
+
+        Method info: http://www.directadmin.com/api.html#email
+
+        Parameters:
+        email -- email account to update its password
+        old_password -- current password of the account
+        new_password -- new password to define
+        """
+        parameters = [('email', email), \
+                      ('oldpassword', old_password), \
+                      ('password1', new_password), \
+                      ('password2', new_password), \
+                      ('api', 'yes')]
+
+        return self._execute_cmd("CMD_API_CHANGE_EMAIL_PASSWORD", \
+                                 parameters)
+
+    def list_pop_accounts (self, domain):
+        """ List POP accounts
+
+        Implements command CMD_API_POP
+
+        Lists all the POP accounts for a domain
+
+        Method info: http://www.directadmin.com/api.html#email
+
+        Parameters:
+        domain -- domain name of which the accounts will be listed
+        """
+        parameters = [('action', 'list'), \
+                      ('domain', domain)]
+        return self._execute_cmd("CMD_API_POP", parameters)
+
+    def create_pop_account (self, domain, user, password, quota=0):
+        """Create POP account
+
+        Implements command CMD_API_POP
+
+        Creates a POP account on a domain
+
+        Method info: http://www.directadmin.com/api.html#email
+
+        Parameters:
+        domain -- domain on which the account will be created
+        user -- email username (what comes before the @)
+        password -- account password
+        quota -- quota in MB, zero is unlimited (default: 0)
+        """
+        parameters = [('action', 'create'), \
+                      ('domain', domain), \
+                      ('user', user), \
+                      ('passwd', password), \
+                      ('quota', quota)]
+        return self._execute_cmd("CMD_API_POP", parameters)
+
+    def delete_pop_account (self, domain, user):
+        """Delete POP account
+
+        Implements command CMD_API_POP
+
+        Deletes a POP account from a domain
+
+        Method info: http://www.directadmin.com/api.html#email
+
+        Parameters:
+        domain -- domain from which the account will be removed
+        user -- email username (what comes before the @)
+        """
+        parameters = [('action', 'delete'), \
+                      ('domain', domain), \
+                      ('user', user)]
+        return self._execute_cmd("CMD_API_POP", parameters)
+
