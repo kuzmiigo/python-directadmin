@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with python-directadmin.  If not, see <http://www.gnu.org/licenses/>.
 
 Author: Andrés Gattinoni
-$Id$
+$Id: suspension.py -1   $
 
 Usage: suspension.py [options] suspend|unsuspend <username>
 
