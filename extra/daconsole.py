@@ -34,7 +34,7 @@ import directadmin
 
 __author__ = "Andrés Gattinoni <andresgattinoni@gmail.com>"
 __version__ = "0.1"
-__revision__ = "$Revision$"
+__revision__ = "$Revision: 26 $"
 
 class CommandError (Exception):
     """Command Error

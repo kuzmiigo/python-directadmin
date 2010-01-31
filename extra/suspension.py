@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with python-directadmin.  If not, see <http://www.gnu.org/licenses/>.
 
 Author: Andrés Gattinoni
-$Id: suspension.py -1   $
+$Id$
 
 Usage: suspension.py [options] suspend|unsuspend <username>
 
@@ -44,7 +44,7 @@ Examples:
 """
 
 __author__ = "Andrés Gattinoni <andresgattinoni@gmail.com>"
-__version__ = "$Revision$"
+__version__ = "$Revision: 26 $"
 
 import sys
 import getpass
