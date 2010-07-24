@@ -63,7 +63,9 @@ def main ():
     # Build an option parser
     parser = OptionParser(usage='%prog [options] suspend|unsuspend <username>', \
                           version=__version__, \
-                          description="Suspension is a simple script for suspending/unsuspending Directadmin users")
+                          description="Suspension is a simple script " \
+                                      "for suspending/unsuspending " \ 
+                                      "Directadmin users")
     parser.add_option('-u', '--user', dest='user', \
                       help='Directadmin admin/reseller username', \
                       metavar='USERNAME', default=None)
@@ -80,11 +82,13 @@ def main ():
     # Parse options and do some input checking
     (option, args) = parser.parse_args()
     if not args or len(args) > 2:
-        parser.error("You need to specify an action (suspend or unsuspend) and a user")
+        parser.error("You need to specify an action " \
+                     "(suspend or unsuspend) and a user")
         return 1
 
     if args[0] not in ("suspend", "unsuspend"):
-        parser.error('Unrecognised action: %s. Should be "suspend" or "unsuspend"' % \
+        parser.error('Unrecognised action: %s. ' \
+                     'Should be "suspend" or "unsuspend"' % \
                       args[0])
         return 2
 
