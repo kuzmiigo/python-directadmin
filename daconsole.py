@@ -29,6 +29,7 @@ To-Do:
 - Add more commands
 """
 import sys
+import cmd
 import getpass
 import directadmin
 
@@ -36,118 +37,7 @@ __author__ = "Andrés Gattinoni <andresgattinoni@gmail.com>"
 __version__ = "0.1"
 __revision__ = "$Revision: 26 $"
 
-class CommandError (Exception):
-    """Command Error
-
-    Basic exception. 
-    This should be thrown when an error 
-    ocurrs during the execution of a command.
-    It will be caught by the command handler,
-    to display the error and return the prompt
-    """
-    pass
-
-class Console (object):
-
-    """Console
-
-    Base console class.
-    Implements the basic functionality
-    of an interactive console. 
-    It allows to register commands with its handlers.
-
-    It provides the user prompt and handles its input.
-    """
-
-    _prompt = '> '
-    _loop = True
-    _handlers = {}
-
-    def __init__ (self):
-        """Constructor
-
-        Initializes the console with its basic
-        commands (currently "quit" and "help")
-        """
-        # Add the basic commands
-        self.add_handler("quit", self.quit, "Quit the console")
-        self.add_handler("help", self.printHelp, "Print command information")
-
-    def main_loop (self):
-        """Main loop
-
-        Main console loop. Once the Console
-        object is instanciated, the main_loop 
-        will start providing the prompt and
-        handling commands.
-        """
-        try:
-            while self._loop:
-                self._handle_cmd(self._read())
-        except KeyboardInterrupt, e:
-            self.quit()
-
-    def quit (self, args=None):
-        """Quit
-
-        Native command. Quits the console.
-        """
-        print "Bye bye..."
-        self._loop = False
-
-    def printHelp (self, args=None):
-        """Print help
-
-        Native command. 
-        Prints all the commands registered
-        on the console instance.
-        """
-        print "Available commands:"
-        for token in sorted(self._handlers.keys()):
-            print "%s    - %s" % (token, self._handlers[token]['info'])
-            
-
-    def add_handler (self, token, handler, info=None):
-        """Add handler
-
-        Adds a new command handler to the console.
-
-        Parameters:
-        token - string - command token (one word)
-        handler - callable - command callback
-        info - string - information about the command to display
-                        with the "help" command.
-        """
-        self._handlers[token] = {'handler': handler, \
-                                 'info': info }
-
-    def _read (self):
-        """Read
-
-        Reads user input
-        """
-        return raw_input(self._prompt)
-
-    def _handle_cmd (self, input):
-        """Handle command
-
-        Handles user input
-
-        Parameters:
-        input - string - user's input
-        """
-        args = input.split(" ")
-        action = args.pop(0)
-        if action in self._handlers:
-            try:
-                self._handlers[action]['handler'](args)
-            except CommandError, e:
-                print "Command error: %s" % (str(e))
-        else:
-            print "Unknown command '%s'. Type 'help' for a list of commands." % action
-
-
-class DAConsole (Console):
+class DAConsole (cmd.Cmd):
 
     """Directadmin Console
 
@@ -162,21 +52,23 @@ class DAConsole (Console):
 
     _api = None
 
+    prompt = "> "
+    intro = "=============================\n" \
+            "  DirectAdmin Console v.%s\n" \
+            "=============================\n" \
+            "Type help or ? for help.\n" \
+            "Type quit, Ctrl+D or Ctrl+C to exit" % \
+             __version__
+
     def __init__ (self):
         """Constructor
 
         Instanciates a new Directadmin Console.
         Adds all the available commands.
         """
-        Console.__init__(self)
-        self.version()
-        self.add_handler("version", self.version, "Print version information")
-        self.add_handler("connect", self.connect, "Connect to a Directadmin Server")
-        self.add_handler("suspend", self.suspend, "Suspends a user on Directadmin")
-        self.add_handler("unsuspend", self.unsuspend, "Un-suspends a user on Directadmin")
-        self.add_handler("server_info", self.server_info, "Prints statistical information about the server")
+        cmd.Cmd.__init__(self)
 
-    def _getApi (self):
+    def _get_api (self):
         """Get API
 
         Returns an instance of Directadmin API.
@@ -216,59 +108,35 @@ class DAConsole (Console):
                                         self._hostname, \
                                         self._port, \
                                         self._https)
-        
         return self._api
 
-    def connect (self, args):
-        """Connect
+    def do_quit (self, s):
+        """Quits the console"""
+        return True
 
-        Connect to a Directadmin Server
-        """
-        self._getApi()
-
-    def version (self, args=None):
-        """Version
-
-        Prints version information
-        """
+    def do_version (self, args=None):
+        """Prints version information"""
         print "Directadmin Console, v.%s" % __version__
 
-    def suspend (self, args):
-        """Suspend
-
-        Command: suspends a Directadmin user
-        """
-        if not args:
-            raise CommandError("Missing user to suspend")
-
-        api = self._getApi()
-        user = args.pop(0)
-        if api.suspend_account(user):
-            print "User %s suspended" % user
+    def do_suspend (self, username):
+        """Suspends a Directadmin user"""
+        api = self._get_api()
+        if api.suspend_account(username):
+            print "User %s suspended" % username
         else:
-            print "Failed to suspend user %s" % user
+            print "Failed to suspend user %s" % username
 
-    def unsuspend (self, args):
-        """Unsuspend
-
-        Command: un-suspends a Directadmin user
-        """
-        if not args:
-            raise CommandError("Missing user to un-suspend")
-
-        api = self._getApi()
-        user = args.pop(0)
-        if api.unsuspend_account(user):
-            print "User %s un-suspended" % user
+    def do_unsuspend (self, username):
+        """Un-suspends a Directadmin user"""
+        api = self._get_api()
+        if api.unsuspend_account(username):
+            print "User %s un-suspended" % username
         else:
-            print "Failed to un-suspend user %s" % user
+            print "Failed to un-suspend user %s" % username
 
-    def server_info (self, args=None):
-        """Server info
-
-        Prints server information
-        """
-        api = self._getApi()
+    def do_server_info (self, args=None):
+        """Prints some basic server information"""
+        api = self._get_api()
         info = api.get_server_stats()
         print "Hostname:\t%s" % self._hostname
         print "Load average:\t%s" % info['loadavg'][0]
@@ -292,6 +160,8 @@ class DAConsole (Console):
                        info[key][0]['usedpercent'], \
                        info[key][0]['mounted'])
 
+    do_EOF = do_quit
+
 def main ():
     """Main
 
@@ -300,7 +170,10 @@ def main ():
     exit status
     """
     console = DAConsole()
-    console.main_loop()
+    try:
+        console.cmdloop()
+    except KeyboardInterrupt:
+        console.do_quit(None)
     return 0
 
 if __name__ == "__main__":
