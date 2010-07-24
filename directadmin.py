@@ -475,7 +475,10 @@ class ApiConnector (object):
        request.add_header('User-Agent', _user_agent)
 
        # Open the URL and handle the response
-       return self._handle_response(urllib2.urlopen(request))
+       try:
+           return self._handle_response(urllib2.urlopen(request))
+       except urllib2.URLError, e:
+           raise ApiError("HTTP Error: %s" % e.reason)
 
     def _get_url (self, cmd):
         """Get URL

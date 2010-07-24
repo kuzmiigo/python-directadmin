@@ -28,14 +28,18 @@ To-Do:
 - Add configuration file
 - Add more commands
 """
+import os
 import sys
 import cmd
 import getpass
+import ConfigParser
 import directadmin
+from optparse import OptionParser
 
 __author__ = "Andrés Gattinoni <andresgattinoni@gmail.com>"
 __version__ = "0.1"
 __revision__ = "$Revision: 26 $"
+__config__ = '~/.daconsole.conf'
 
 class DAConsole (cmd.Cmd):
 
@@ -50,6 +54,9 @@ class DAConsole (cmd.Cmd):
     _port = 2222
     _https = False
 
+    _config_file = None
+    _servers = {}
+
     _api = None
 
     prompt = "> "
@@ -60,26 +67,60 @@ class DAConsole (cmd.Cmd):
             "Type quit, Ctrl+D or Ctrl+C to exit" % \
              __version__
 
-    def __init__ (self):
+    def __init__ (self, api=None, config=None, nested=False):
         """Constructor
 
         Instanciates a new Directadmin Console.
         Adds all the available commands.
         """
         cmd.Cmd.__init__(self)
+        self._nested = nested
+        self._parse_config(config)
+        self._api = api
 
-    def _get_api (self):
+    def onecmd (self, line):
+        """Overloading of the cmd.Cmd.onecmd method
+           to handle API exceptions"""
+        r = False
+        try:
+            r = cmd.Cmd.onecmd(self, line)
+        except directadmin.ApiError, e:
+            print "Error: %s" % str(e)
+            if self._nested:
+                return True
+        return r
+
+    def _parse_config (self, config):
+        """Parses the configuration file"""
+        if config is not None and os.path.isfile(config):
+            self._config_file = config
+            parser = ConfigParser.SafeConfigParser()
+            parser.readfp(open(self._config_file))
+            for section in parser.sections():
+                self._servers[section] = {}
+                for option, value in parser.items(section):
+                    self._servers[section][option] = value
+
+
+    def _get_api (self, data=None):
         """Get API
 
         Returns an instance of Directadmin API.
         It takes care of asking for connection and login
         information to the user.
         """
+        if data is not None:
+            self._api = None
+            self._hostname = data['hostname']
+            self._port = data['port']
+            self._username = data['username']
+            self._password = data['password']
+
         if self._api is None:
             # Check hostname and port
             if self._hostname is None:                
                 host = raw_input('Host [localhost]: ')
-                if host is None:
+                if host == "":
                     self._hostname = "localhost"
                 else:
                     self._hostname = host
@@ -103,11 +144,17 @@ class DAConsole (cmd.Cmd):
             if self._password is None:
                 self._password = getpass.getpass('Password: ')
 
+            # Get the API object
             self._api = directadmin.Api(self._username, \
                                         self._password, \
                                         self._hostname, \
                                         self._port, \
                                         self._https)
+            # Add the server to the list
+            self._servers[self._hostname] = {'hostname': self._hostname, \
+                                             'port': self._port, \
+                                             'username': self._username, \
+                                             'password': self._password}
         return self._api
 
     def do_quit (self, s):
@@ -117,6 +164,44 @@ class DAConsole (cmd.Cmd):
     def do_version (self, args=None):
         """Prints version information"""
         print "Directadmin Console, v.%s" % __version__
+
+    def do_config_file (self, s):
+        """Shows the configuration file currently being used"""
+        if self._config_file is None:
+            print "No configuration file found"
+        else:
+            print "Using %s configuration file" % self._config_file
+
+    def do_show_servers (self, server=None):
+        """Shows the list of defined servers"""
+        list = self._servers
+        if server is not None:
+            if server in self._servers:
+                list = self._servers[server]
+        print list
+                
+
+    def do_connect (self, server):
+        """Connect to a Directadmin server.
+           Usage: connect [server_name]
+           server_name = a server name defined
+                         on the config file"""
+        data = None
+        if server is not None:
+            if server in self._servers:
+                data = self._servers[server]
+        api = self._get_api(data)
+        cmd = DAConsole(api, nested=True)
+        cmd.prompt = self._hostname.split(".")[0] + "> "
+        cmd.intro = None
+        cmd.cmdloop()
+
+    def complete_connect (self, text, line, begidx, endix):
+        """Complete function for connect command.
+           It completes the parameters based on the servers
+           defined on the configuration file"""
+        if len(self._servers) > 0:
+            return [i for i in self._servers if i.startswith(text)]
 
     def do_suspend (self, username):
         """Suspends a Directadmin user"""
@@ -162,6 +247,17 @@ class DAConsole (cmd.Cmd):
 
     do_EOF = do_quit
 
+def get_optparser ():
+    """Defines the OptionParser to handle
+       command line configuration options"""
+    parser = OptionParser('%prog [options]', \
+                          version='Directadmin Console v.%s' % __version__,
+                          description='Interactive console for the ' \
+                                      'Directadmin Control Panel')
+    parser.add_option('-c', '--config', dest='config', \
+                      help='Set configuration file', \
+                      metavar='FILE', default=__config__)
+    return parser
 def main ():
     """Main
 
@@ -169,7 +265,9 @@ def main ():
     Handles the main loop and returns an
     exit status
     """
-    console = DAConsole()
+    parser = get_optparser()
+    (option, args) = parser.parse_args()
+    console = DAConsole(config=option.config)
     try:
         console.cmdloop()
     except KeyboardInterrupt:
