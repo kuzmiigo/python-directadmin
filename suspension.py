@@ -64,7 +64,7 @@ def main ():
     parser = OptionParser(usage='%prog [options] suspend|unsuspend <username>', \
                           version=__version__, \
                           description="Suspension is a simple script " \
-                                      "for suspending/unsuspending " \ 
+                                      "for suspending/unsuspending " \
                                       "Directadmin users")
     parser.add_option('-u', '--user', dest='user', \
                       help='Directadmin admin/reseller username', \
