@@ -37,7 +37,7 @@ import directadmin
 from optparse import OptionParser
 
 __author__ = "Andrés Gattinoni <andresgattinoni@gmail.com>"
-__version__ = "0.1"
+__version__ = "0.2"
 __revision__ = "$Revision: 26 $"
 __config__ = '~/.daconsole.conf'
 
@@ -111,10 +111,11 @@ class DAConsole (cmd.Cmd):
         """
         if data is not None:
             self._api = None
-            self._hostname = data['hostname']
-            self._port = data['port']
-            self._username = data['username']
-            self._password = data['password']
+            self._hostname = None if 'hostname' not in data else data['hostname']
+            self._port = None if 'port' not in data else data['port']
+            self._username = None if 'username' not in data else data['username']
+            self._password = None if 'password' not in data else data['password']
+            self._https = None if 'https' not in data else data['https']
 
         if self._api is None:
             # Check hostname and port
