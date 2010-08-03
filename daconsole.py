@@ -179,8 +179,15 @@ class DAConsole (cmd.Cmd):
         if server is not None:
             if server in self._servers:
                 list = self._servers[server]
-        print list
-                
+        if len(list) == 0:
+            print "There are is no server information configured."
+        else:
+            print "Defined servers:"
+            for name in list:
+                print "* %s (%s@%s:%d)" % \
+                      (name, list[name]['username'], \
+                       list[name]['hostname'], \
+                       int(list[name]['port']))
 
     def do_connect (self, server):
         """Connect to a Directadmin server.
