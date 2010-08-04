@@ -2,16 +2,21 @@
 # -*- coding: utf-8 -*-
 from distutils.core import setup
 
+_description = "python-directadmin is a Python implementation " \
+               "of Directadmin Panel Control Web API."
+
 setup(name='python-directadmin', \
       version='0.3', \
       description='Python implementation of Directadmin\'s Web API', \
+      long_description=_description, \
       author='Andrés Gattinoni', \
       author_email='andresgattinoni@gmail.com', \
-      url='http://code.google.com/p/python-directadmin/', \
-      packages=['directadmin'], \
-      data_files=[('directadmin', ['LICENSE'])], \
-      scripts=['scripts/da_suspension', 'scripts/da_console'], \
       license='GPL v.3', \
+      url='http://code.google.com/p/python-directadmin/', \
+      download_url='http://code.google.com/p/python-directadmin/downloads/list', \
+      packages=['directadmin'], \
+      scripts=['scripts/da_suspension', 'scripts/da_console'], \
+      platforms=['POSIX'], \
       classifiers=[
         'Development Status :: 3 - Alpha', \
         'Environment :: Console', \
