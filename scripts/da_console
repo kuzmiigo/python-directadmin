@@ -22,7 +22,7 @@ Author: Andrés Gattinoni
 $Id$
 
 Usage:
-./daconsole.py
+./da_console
 
 To-Do:
 - Add configuration file
