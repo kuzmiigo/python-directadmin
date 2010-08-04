@@ -1,3 +1,4 @@
+==================
 Python Directadmin
 ==================
 
@@ -5,60 +6,68 @@ Python Directadmin
 
 Intro
 -----
-The aim of this project is to provide a simple and clean implementation of Directadmin's Web API for Python developers.
+The aim of this project is to provide a simple and clean implementation 
+of Directadmin's Web API for Python developers.
 
-Directadmin_ is a popular web control panel. It provides an HTTP API which python-directadmin intends to implement, to help python developers interact with the control panel.
-
-**IMPORTANT: This project is on development stage and shouldn't be included in any production software. The author will not be responsible for errors in this code, nor the usage it is given to it by third parties.**
+Directadmin_ is a popular web control panel. It provides an HTTP API which 
+*python-directadmin* intends to implement, to help python developers 
+interact with the control panel.
 
 Examples
 --------
 
 **List all users**
 
-import directadmin
+::
+  import directadmin
 
-api = directadmin.Api("admin", "password", "hostname.com", 2222)
-print api.list_all_users()
+  api = directadmin.Api("admin", "password", "hostname.com", 2222)
+  print api.list_all_users()
 
 
 **Connect using HTTPS and list all users**
 
-import directadmin
+::
+  import directadmin
 
-api = directadmin.Api("admin", \
-                      "password", \
-                      "hostname.com", \
-                      2222, \
-                      True)
-print api.list_all_users()
+  api = directadmin.Api("admin", \
+                        "password", \
+                        "hostname.com", \
+                        2222, \
+                        True)
+  print api.list_all_users()
 
 **Create an EndUser** (regular user)
 
-import directadmin
+::
+  import directadmin
 
-api = directadmin.Api("admin", "password", "hostname.com")
-user = EndUser('username', \
-               'email@domain.com', \
-               'userpassword', \
-               'domain.com', \
-               'service_package_1', \
-               '1.2.3.4')
-if api.create_user(user, True):
-    print "User %s successfuly created" % user['username']
-else:
-    print "Failed to create user"
+  api = directadmin.Api("admin", "password", "hostname.com")
+  user = EndUser('username', \
+                 'email@domain.com', \
+                 'userpassword', \
+                 'domain.com', \
+                 'service_package_1', \
+                 '1.2.3.4')
+  if api.create_user(user, True):
+      print "User %s successfuly created" % user['username']
+  else:
+      print "Failed to create user"
 
 
 Scripts
 -------
 
-Within the source code of this project you will find some sample scripts meant to explain how to use the API while performing some basic administrative tasks.
+Within the source code of this project you will find some sample scripts 
+meant to explain how to use the API while performing some basic administrative tasks.
 
 License information
 -------------------
 
-The author of this code has no relationship with Directadmin or its creators. This is just an implementation of a public API distributed under GPL v.3 license. It is meant to be used to interact with Directadmin Web Control Panel, which is a privative software that requires the purchase of a license to operate.
+The author of this code has no relationship with Directadmin or its creators. 
+This is just an implementation of a public API distributed under GPL v.3 license. 
+It is meant to be used to interact with Directadmin Web Control Panel, 
+which is a privative software that requires the purchase of a license to operate.
 
 Copyright (C) 2009, Andrés Gattinoni
 
