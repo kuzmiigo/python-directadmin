@@ -9,6 +9,7 @@ setup(name='python-directadmin', \
       author_email='andresgattinoni@gmail.com', \
       url='http://code.google.com/p/python-directadmin/', \
       packages=['directadmin'], \
+      data_files=['LICENSE'], \
       scripts=['scripts/da_suspension', 'scripts/da_console'], \
       license='GPL v.3', \
       classifiers=[
