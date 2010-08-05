@@ -158,6 +158,11 @@ class DAConsole (cmd.Cmd):
                                              'password': self._password}
         return self._api
 
+    def help_help (self):
+        """Help information for the help command"""
+        print "Shows help information."
+        print "Usage: ? | help [command]"
+
     def do_quit (self, s):
         """Quits the console"""
         return True
