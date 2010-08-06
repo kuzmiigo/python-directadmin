@@ -58,6 +58,9 @@ class DAConsole (cmd.Cmd):
     _servers = {}
 
     _api = None
+    _user_list = []
+
+    _list_items = ['users', 'resellers', 'admins']
 
     prompt = "> "
     intro = "=============================\n" \
@@ -215,6 +218,11 @@ class DAConsole (cmd.Cmd):
            defined on the configuration file"""
         if len(self._servers) > 0:
             return [i for i in self._servers if i.startswith(text)]
+    
+    def _complete_users (self, text, line, begidx, endix):
+        """Base method for autocompletion with usernames
+           It works if there's a connection established"""
+        return [i for i in self._get_user_list() if i.startswith(text)] 
 
     def do_suspend (self, username):
         """Suspends a Directadmin user"""
@@ -224,6 +232,8 @@ class DAConsole (cmd.Cmd):
         else:
             print "Failed to suspend user %s" % username
 
+    complete_suspend = _complete_users
+
     def do_unsuspend (self, username):
         """Un-suspends a Directadmin user"""
         api = self._get_api()
@@ -231,6 +241,40 @@ class DAConsole (cmd.Cmd):
             print "User %s un-suspended" % username
         else:
             print "Failed to un-suspend user %s" % username
+
+    complete_unsuspend = _complete_users
+
+    def _get_user_list (self):
+        """Retrieves and caches the user list of a server
+           if the information is present.
+           Used by _complete_users"""
+        if len(self._user_list) == 0:
+            if self._api is not None:
+                self._user_list = self._api.list_users()
+        return self._user_list
+
+    def do_list (self, what=None):
+        """Prints the list of users of a certain type: users, resellers, admins"""
+        if what is None or what == "":
+            print "What do you want to list? (users, resellers or admins)"
+            what = raw_input("? ")
+        if what in self._list_items:
+            api = self._get_api()
+            if what == 'users':
+                list = api.list_users()
+            elif what == 'resellers':
+                list = api.list_resellers()
+            elif what == 'admins':
+                list = api.list_admins()
+            for item in list:
+                print item
+            print "%d %s listed" % (len(list), what)
+        else:
+            print "Can't list '%s'" % what
+
+    def complete_list (self, text, line, begidx, endix):
+        """Complete function for list command"""
+        return [i for i in self._list_items if i.startswith(text)] 
 
     def do_server_info (self, args=None):
         """Prints some basic server information"""
