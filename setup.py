@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
 from distutils.core import setup
+
+if not hasattr(sys, 'version_info') or sys.version_info < (2,5,0):
+    raise SystemExit("python-directadmin requires Python 2.5 or higher to work")
 
 _description = "python-directadmin is a Python implementation " \
                "of Directadmin Panel Control Web API."
