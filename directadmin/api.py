@@ -577,9 +577,9 @@ class Api (object):
        """
        return self._connector.execute(cmd, parameters)
 
-    def _yes_no (self, bool):
+    def _yes_no (self, b):
         """Translates a boolean to "yes"/"no" """
-        if bool(bool):
+        if bool(b):
             return "yes"
         else:
             return "no"
