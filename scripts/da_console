@@ -250,7 +250,7 @@ class DAConsole (cmd.Cmd):
            Used by _complete_users"""
         if len(self._user_list) == 0:
             if self._api is not None:
-                self._user_list = self._api.list_users()
+                self._user_list = self._api.list_all_users()
         return self._user_list
 
     def do_list (self, what=None):
