@@ -83,17 +83,17 @@ class User (object):
         """Sets a user property"""
         self._properties[key] = value
 
-    def update (self, dict):
+    def update (self, properties):
         """Updates the properties dictionary"""
-        return self._properties.update(dict)
+        return self._properties.update(properties)
 
-    def getList (self):
+    def get_list (self):
         """Returns a list of tuples with all the
            properties of the User, to be sent in API commands"""
-        list = []
+        l = []
         for key, value in self._properties.items():
-            list.append((key, value))
-        return list
+            l.append((key, value))
+        return l
 
 class AdminUser (User):
     """AdminUser
@@ -218,15 +218,15 @@ class ResellerUser (User):
                            server's main ip. assign will use one of the reseller's ips
                            (default: shared)
         """
-        User.__init__(self, username, email, password)
+        super(User, self).__init__(username, email, password)
         self['domain'] = domain
         self['ip'] = ip
         if package is not None:
             self['package'] = package
         else:
-            self.update(self._getDefaultConfig())
+            self.update(self._get_default_config())
 
-    def _getDefaultConfig (self):
+    def _get_default_config (self):
         """Get dafault config
         
         Returns a dictionary with the default
@@ -370,15 +370,15 @@ class EndUser (User):
         ip              -- One of the ips which is available for user creation. 
                            Only free or shared ips are allowed.
         """
-        User.__init__(self, username, email, password)
+        super(User, self).__init__(username, email, password)
         self['domain'] = domain
         self['ip'] = ip
         if package is not None:
             self['package'] = package
         else:
-            self.update(self._getDefaultConfig())
+            self.update(self._get_default_config())
 
-    def _getDefaultConfig (self):
+    def _get_default_config (self):
         """Get dafault config
         
         Returns a dictionary with the default
@@ -604,7 +604,7 @@ class Api (object):
         parameters = [('action', 'create'), \
                       ('add', 'Submit'), \
                       ('notify', self._yes_no(notify))]
-        parameters.extend(admin_user.getList())
+        parameters.extend(admin_user.get_list())
         return self._execute_cmd("CMD_API_ACCOUNT_ADMIN", parameters)
 
     def create_reseller (self, reseller_user, notify=True):
@@ -628,7 +628,7 @@ class Api (object):
                       ('add', 'Submit'), \
                       ('notify', self._yes_no(notify))]
 
-        parameters.extend(reseller_user.getList())
+        parameters.extend(reseller_user.get_list())
         return self._execute_cmd("CMD_API_ACCOUNT_RESELLER", parameters)
 
     def create_user (self, end_user, notify=True):
@@ -651,7 +651,7 @@ class Api (object):
         parameters = [('action', 'create'), \
                       ('add', 'Submit'), \
                       ('notify', self._yes_no(notify))]
-        parameters.extend(end_user.getList())
+        parameters.extend(end_user.get_list())
         return self._execute_cmd("CMD_API_ACCOUNT_USER", parameters)
 
     def show_ips (self, ip=None):
@@ -712,14 +712,12 @@ class Api (object):
             parameters.append(('dounsuspend', 'yes'))
 
         # Add all the users to the list
-        n=0
-        for user in users:
+        for n, user in enumerate(users):
             if isinstance(user, User):
                 username = user['username']
             else:
                 username = user
             parameters.append(('select%d' % n, username))
-            n = n + 1
 
         # Do the magic
         return self._execute_cmd("CMD_API_SELECT_USERS", parameters)
@@ -1073,10 +1071,8 @@ class Api (object):
         """
         parameters = [('action', 'delete')]
         if isinstance(dbs, list):
-            n = 0
-            for name in dbs:
+            for n, name in enumerate(dbs):
                 parameters.append(('select%d' % n, name))
-                n = n + 1
         else:
             parameters.append(('selected0', dbs))
 
