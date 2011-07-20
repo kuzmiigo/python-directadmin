@@ -1156,4 +1156,152 @@ class Api (object):
                       ('domain', domain), \
                       ('user', user)]
         return self._execute_cmd("CMD_API_POP", parameters)
+    
+    def check_pop_password (self, email, password):
+        """Check POP password
+
+        Implements command CMD_API_EMAIL_AUTH
+
+        Checks the password of a POP account
+
+        Method info: http://www.directadmin.com/features.php?id=588
+
+        Parameters:
+        email -- email account to check its password
+        password -- current password of the account
+        """
+        parameters = [('email', email), \
+                      ('passwd', password)]
+
+        return self._execute_cmd("CMD_API_EMAIL_AUTH", parameters)
+    
+    def get_pop_vacation (self, domain, user):
+        """Get vacation details
+
+        Implements command CMD_API_EMAIL_VACATION_MODIFY
+
+        Gets vacation details of a POP account
+
+        Method info: http://www.directadmin.com/features.php?id=348
+
+        Parameters:
+        domain -- email domain (what comes after the @)
+        user -- email username (what comes before the @)
+        """
+        parameters = [('domain', domain), \
+                      ('user', user)]
+
+        return self._execute_cmd("CMD_API_EMAIL_VACATION_MODIFY", parameters)
+    
+    def list_pop_vacations (self, domain):
+        """List vacations
+
+        Implements command CMD_API_EMAIL_VACATION
+
+        Lists vacations of a domain
+
+        Method info: http://www.directadmin.com/features.php?id=348
+
+        Parameters:
+        domain -- email domain
+        """
+        parameters = [('domain', domain)]
+
+        return self._execute_cmd("CMD_API_EMAIL_VACATION", parameters)
+    
+    def create_pop_vacation (self, domain, user, text, \
+                             startyear, startmonth, startday, starttime, \
+                             endyear, endmonth, endday, endtime):
+        """Create POP vacation
+
+        Implements command CMD_API_EMAIL_VACATION
+
+        Creates a vacation message for a given period for a POP account
+        on a domain
+
+        Method info: http://www.directadmin.com/features.php?id=348
+
+        Parameters:
+        domain -- email domain
+        user -- email username (what comes before the @)
+        text -- vacation message
+        startyear -- 4-digit year
+        startmonth -- 2-digit month (01-12) 
+        startday -- 2-digit day (01-31)
+        starttime -- morning|afternoon|evening
+        endyear -- 4-digit year
+        endmonth -- 2-digit month (01-12)
+        endday -- 2-digit day (01-31)
+        endtime -- morning|afternoon|evening
+        """
+        parameters = [('action', 'create'), \
+                      ('domain', domain), \
+                      ('user', user), \
+                      ('text', text), \
+                      ('startyear', startyear), \
+                      ('startmonth', startmonth), \
+                      ('startday', startday), \
+                      ('starttime', starttime), \
+                      ('endyear', endyear), \
+                      ('endmonth', endmonth), \
+                      ('endday', endday), \
+                      ('endtime', endtime) ]
+        return self._execute_cmd("CMD_API_EMAIL_VACATION", parameters)
+    
+    def update_pop_vacation (self, domain, user, text, \
+                             startyear, startmonth, startday, starttime, \
+                             endyear, endmonth, endday, endtime):
+        """Update POP vacation
+
+        Implements command CMD_API_EMAIL_VACATION
+
+        Updates a vacation message for a given period for a POP account
+        on a domain
+
+        Method info: http://www.directadmin.com/features.php?id=348
+
+        Parameters:
+        domain -- email domain
+        user -- email username (what comes before the @)
+        text -- vacation message
+        startyear -- 4-digit year
+        startmonth -- 2-digit month (01-12) 
+        startday -- 2-digit day (01-31)
+        starttime -- morning|afternoon|evening
+        endyear -- 4-digit year
+        endmonth -- 2-digit month (01-12)
+        endday -- 2-digit day (01-31)
+        endtime -- morning|afternoon|evening
+        """
+        parameters = [('action', 'modify'), \
+                      ('domain', domain), \
+                      ('user', user), \
+                      ('text', text), \
+                      ('startyear', startyear), \
+                      ('startmonth', startmonth), \
+                      ('startday', startday), \
+                      ('starttime', starttime), \
+                      ('endyear', endyear), \
+                      ('endmonth', endmonth), \
+                      ('endday', endday), \
+                      ('endtime', endtime) ]
+        return self._execute_cmd("CMD_API_EMAIL_VACATION", parameters)
+    
+    def delete_pop_vacation (self, domain, user):
+        """Delete POP vacation
+
+        Implements command CMD_API_EMAIL_VACATION
+
+        Delete the vacation message for a POP account on a domain
+
+        Method info: http://www.directadmin.com/features.php?id=348
+
+        Parameters:
+        domain -- email domain
+        user -- email username (what comes before the @)
+        """
+        parameters = [('action', 'delete'), \
+                      ('domain', domain), \
+                      ('select0', user)]
+        return self._execute_cmd("CMD_API_EMAIL_VACATION", parameters)
 
